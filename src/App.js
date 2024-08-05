@@ -1,24 +1,24 @@
-import logo from './logo.svg';
 import './App.css';
+import DynamicBundleForm from './Components/Dynamic-field';
+import MultiTabForm from './Components/Multi-step-from';
+import { BrowserRouter as Router , Routes , Route } from 'react-router-dom';
+import Navbar from './Components/Navbar';
+import AdvancedValidationForm from './Components/Cross-field';
+import ComplexOrderForm from './Components/Nested-field';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+   <>
+   <Router>
+      <Navbar/>
+    <Routes>
+      <Route path='/' element={<MultiTabForm/>} />
+      <Route path='/dynamic' element={<DynamicBundleForm/>} />
+      <Route path='/advancevalidation' element={<AdvancedValidationForm/>} />
+      <Route path='/nested' element={<ComplexOrderForm/>} />
+    </Routes>
+   </Router>
+   </>
   );
 }
 
