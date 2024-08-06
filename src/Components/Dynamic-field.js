@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -25,7 +25,6 @@ const bundleSchema = z.object({
 });
 
 const DynamicBundleForm = () => {
-  const [priceValue, setPriceValue] = useState(0);
   const { register, control, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(bundleSchema),
     defaultValues: {
@@ -33,16 +32,31 @@ const DynamicBundleForm = () => {
       products: [{ name: '', quantity: 1, price: 0 }],
     },
   });
-  
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "products",
   });
 
+  // Watch the entire form values
+  const formValues = useWatch({ control });
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [totalPriceError, setTotalPriceError] = useState('');
+
+  useEffect(() => {
+    const total = formValues.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+    setTotalPrice(total);
+    if (total > 1000) {
+      setTotalPriceError("Total bundle price cannot exceed $1000");
+    } else {
+      setTotalPriceError('');
+    }
+  }, [formValues]);
+
   const onSubmit = (data) => {
-    const totalPrice = data.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
-    setPriceValue(totalPrice);
-   
+    if (!totalPriceError) {
+      console.log('Form submitted with data:', data);
+    }
   };
 
   return (
@@ -79,9 +93,7 @@ const DynamicBundleForm = () => {
         </div>
       ))}
 
-      {errors.products?.message && (
-        <p>{errors.products.message}</p>
-      )}
+      {totalPriceError && <p>{totalPriceError}</p>}
 
       <button
         type="button"
@@ -91,9 +103,9 @@ const DynamicBundleForm = () => {
       </button>
       <button type="submit">Create Bundle</button>
 
-      {priceValue > 0 && (
+      {totalPrice > 0 && !totalPriceError && (
         <div>
-          <p>Total Price: ${priceValue.toFixed(2)}</p>
+          <p>Total Price: ${totalPrice.toFixed(2)}</p>
         </div>
       )}
     </form>

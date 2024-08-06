@@ -26,11 +26,7 @@ const MultiTabForm = () => {
     
     } 
   };
-//   const handleUpdate = () => {
-//     if(tabState.currentTab === 'overview'){
-//         tabState.setCurrentTab('personal')
-//     }
-//   }
+
   const onSubmit = (data) => {
     console.log(data);
     setOver(data);

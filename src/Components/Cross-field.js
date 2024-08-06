@@ -2,9 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-// Simulated API call for username availability check
-
-
+// Define the validation schema using Zod
 const schema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
@@ -16,15 +14,22 @@ const schema = z.object({
   path: ["confirmPassword"],
 });
 
-const customResolver = async (data, context, options) => {
+// Custom resolver to use Zod with React Hook Form
+const customResolver = async (data) => {
   const result = schema.safeParse(data);
   if (!result.success) {
-    return { values: {}, errors: result.error.format() };
+    const formattedErrors = result.error.errors.reduce((acc, error) => {
+      const path = error.path.join('.');
+      acc[path] = {
+        type: 'manual',
+        message: error.message,
+      };
+      return acc;
+    }, {});
+    return { values: {}, errors: formattedErrors };
   }
 
- 
-
-  return { values: data, errors: {} };
+  return { values: result.data, errors: {} };
 };
 
 const AdvancedValidationForm = () => {
@@ -48,20 +53,30 @@ const AdvancedValidationForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <input {...register('username')} placeholder="Username" />
-      {errors.username && <p>{errors.username.message}</p>}
+      <div>
+        <input {...register('username')} placeholder="Username" />
+        {errors.username && <p>{errors.username.message}</p>}
+      </div>
 
-      <input {...register('email')} placeholder="Email" />
-      {errors.email && <p>{errors.email.message}</p>}
+      <div>
+        <input {...register('email')} placeholder="Email" />
+        {errors.email && <p>{errors.email.message}</p>}
+      </div>
 
-      <input type="password" {...register('password')} placeholder="Password" />
-      {errors.password && <p>{errors.password.message}</p>}
+      <div>
+        <input type="password" {...register('password')} placeholder="Password" />
+        {errors.password && <p>{errors.password.message}</p>}
+      </div>
 
-      <input type="password" {...register('confirmPassword')} placeholder="Confirm Password" />
-      {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
+      <div>
+        <input type="password" {...register('confirmPassword')} placeholder="Confirm Password" />
+        {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
+      </div>
 
-      <input type="number" {...register('age', { valueAsNumber: true })} placeholder="Age" />
-      {errors.age && <p>{errors.age.message}</p>}
+      <div>
+        <input type="number" {...register('age', { valueAsNumber: true })} placeholder="Age" />
+        {errors.age && <p>{errors.age.message}</p>}
+      </div>
 
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Submitting...' : 'Submit'}
